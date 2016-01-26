@@ -5,6 +5,7 @@
   (:export #:parse
            #:schema
            #:<parse-error>
+           #:<validation-error>
            #:str
            #:int
            #:bool
@@ -56,7 +57,7 @@
         (parse-integer value)
       (parse-error (e)
         (declare (ignore e))
-        (error '<parse-error> :type type :value value))))
+        (error '<parse-error> :type 'integer :value value))))
 
 ;; https://github.com/alecthomas/voluptuous/blob/master/voluptuous.py#L1265
 (defun bool (value)
@@ -77,7 +78,7 @@
   value)
 
 (defun email (value)
-  (unless (ppcre:scan ".+@.+\..+" value)
+  (unless (ppcre:scan ".+@.+\\\..+" value)
     (error '<validation-error>
               :rule (format nil "string doesn't contain an email address")
               :value value))
