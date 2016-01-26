@@ -42,7 +42,7 @@ Applies `schema` to `data` and binds to bindings."
             ,@(mapcar (lambda (binding)
                         (if (listp binding)
                             `(,(first binding)
-                               (gethash (alexandria:make-keyword ,(second binding))
+                               (gethash ,(alexandria:make-keyword (second binding))
                                         ,validated))
                             `(,binding
                               (gethash ,(alexandria:make-keyword binding)

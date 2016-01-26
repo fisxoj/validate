@@ -42,10 +42,14 @@
              :has-dog "no"
              :email   "something@example.com")))
 
-  (v:with-validated-values (name age has-dog email) (schema data)
+  (v:with-validated-values (name
+                            age
+                            (dog has-dog) ;; Value bound to a different name
+                            email)
+      (schema data)
     (is name     "matt")
     (is age      27)
-    (is has-dog  nil)
+    (is dog  nil)
     (is email    "something@example.com")))
 
 (finalize)
