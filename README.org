@@ -1,0 +1,18 @@
+* Validate
+
+** Usage
+
+** Dependencies
+- iterate
+- cl-ppcre
+** Installation
+
+** Author
+
++ Matt Novenstern (fisxoj@gmail.com)
+
+** Copyright
+
+Copyright (c) 2016 Matt Novenstern (fisxoj@gmail.com)
+** License
+LLGPLv3+
