@@ -5,6 +5,7 @@
 ** Dependencies
 - iterate
 - cl-ppcre
+- alexandria
 ** Installation
 
 ** Author
