@@ -6,6 +6,7 @@
            #:schema
            #:<parse-error>
            #:<validation-error>
+           #:with-validated-values
            #:str
            #:int
            #:bool
@@ -13,8 +14,43 @@
 (in-package :validate)
 
 
+(define-condition <parse-error> (simple-error)
+  ((value :initarg :value)
+   (type :initarg :type))
+  (:report (lambda (condition stream)
+             (with-slots (value type) condition
+               (format stream "Value ~a is not of type ~A" value type))))
+  (:documentation "An error for conditions where a submitted value cannot be interpreted as the given type."))
+
+(define-condition <validation-error> (simple-error)
+  ((value :initarg :value)
+   (rule :initarg :rule))
+  (:report (lambda (condition stream)
+             (with-slots (rule value) condition
+                 (format stream "Value ~a didn't satisfy condition ~S" value rule))))
+  (:documentation "Error to signal a validation condition wasn't met.
+  e.g. Value 'a' didn't satisfy contition 'length at least 3 characters"))
+
+(defmacro with-validated-values (bindings (schema data) &body body)
+  "Macro for extracting values from some map/hash like object and binding them lexically.
+
+Applies `schema` to `data` and binds to bindings."
+  (alexandria:with-gensyms (validated)
+
+    `(let* ((,validated (schema ,schema ,data :as :hash-table))
+
+            ,@(mapcar (lambda (binding)
+                        (if (listp binding)
+                            `(,(first binding)
+                               (gethash (alexandria:make-keyword ,(second binding))
+                                        ,validated))
+                            `(,binding
+                              (gethash ,(alexandria:make-keyword binding)
+                                       ,validated))))
+                      bindings))
+       ,@body)))
+
 (defun schema (schema data &key (from :plist) (as :plist) allow-other-fields)
-  (declare (optimize debug))
   (let ((schema (funcall
                  (ecase from
                    (:plist #'alexandria:plist-alist)
@@ -34,23 +70,6 @@
 
               (collect (cons field (funcall validation value)))))))
 
-
-(define-condition <parse-error> (simple-error)
-  ((value :initarg :value)
-   (type :initarg :type))
-  (:report (lambda (condition stream)
-             (with-slots (value type) condition
-               (format stream "Value ~a is not of type ~A" value type))))
-  (:documentation "An error for conditions where a submitted value cannot be interpreted as the given type."))
-
-(define-condition <validation-error> (simple-error)
-  ((value :initarg :value)
-   (rule :initarg :rule))
-  (:report (lambda (condition stream)
-             (with-slots (rule value) condition
-                 (format stream "Value ~a didn't satisfy condition ~S" value rule))))
-  (:documentation "Error to signal a validation condition wasn't met.
-  e.g. Value 'a' didn't satisfy contition 'length at least 3 characters"))
 
 (defun int (value)
   (handler-case

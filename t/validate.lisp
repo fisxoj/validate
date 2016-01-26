@@ -21,23 +21,20 @@
 
 ;; Test schema validation
 
-(let ((schema (list
-               :name (lambda (value) (v:str value :min-length 1))
-               :age  #'v:int
-               :has-dog #'v:bool
-               :email #'v:email))
-      (data (list
+(let ((schema `(:name    ,(lambda (value) (v:str value :min-length 1))
+                :age     v:int
+                :has-dog v:bool
+                :email   v:email))
+      (data '(
              :name    "matt"
              :age     "27"
              :has-dog "no"
-             :email "something@example.com")))
+             :email   "something@example.com")))
 
-  (let ((validated (validate:schema schema data)))
-    (is (getf validated :name)    "matt")
-    (is (getf validated :age)     27)
-    (is (getf validated :has-dog) nil)
-    (is (getf validated :email)   "something@example.com")))
-
-
+  (v:with-validated-values (name age has-dog email) (schema data)
+    (is name     "matt")
+    (is age      27)
+    (is has-dog  nil)
+    (is email    "something@example.com")))
 
 (finalize)
