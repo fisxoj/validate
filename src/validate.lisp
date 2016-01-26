@@ -84,7 +84,7 @@ Applies `schema` to `data` and binds to bindings."
       (cond
         ((member downcased-value '("y" "yes" "t" "true"  "on"  "enable" ) :test #'string=) t)
         ((member downcased-value '("n" "no"  "f" "false" "off" "disable") :test #'string=) nil)
-        (t (error '<parse-error>  :type type :value value)))))
+        (t (error '<parse-error>  :type 'boolean :value value)))))
 
 (defun str (value &key min-length max-length)
   (when min-length
