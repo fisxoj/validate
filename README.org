@@ -1,4 +1,6 @@
 * Validate
+#+ATTR_HTML: title="Build Status"
+[[https://travis-ci.org/fisxoj/validate][file:https://travis-ci.org/fisxoj/validate.svg?branch=master]]
 
 ** Usage
 From the test suite:
