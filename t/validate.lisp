@@ -18,6 +18,7 @@
 ;;; String
 (subtest "Strings"
   (is-error (v:str "me" :min-length 3) 'v:<validation-error> "A too-short string throws an error.")
+  (is-error (v:str "pizza" :max-length 3) 'v:<validation-error> "A too-long string throws an error.")
   (is (v:str "a string") "a string" "Validated strings match the original string."))
 
 ;;; Integer
