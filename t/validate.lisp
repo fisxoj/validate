@@ -56,6 +56,11 @@
 	    'validate:<parse-error>
 	    "raise a parse error on strings that aren't boolean values"))
 
+;; Default values
+(subtest "Default"
+  (is (v:default nil "potato") "potato" "Supplies a value instead of nil.")
+  (is (v:default "" "potato") "potato" "Supplies a value for an empty string."))
+
 ;; Test schema validation
 (subtest "Schemas"
   (let ((schema '(:name          ((v:str :min-length 1))
