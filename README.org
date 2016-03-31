@@ -2,6 +2,9 @@
 #+ATTR_HTML: title="Build Status"
 [[https://travis-ci.org/fisxoj/validate][file:https://travis-ci.org/fisxoj/validate.svg?branch=master]]
 
+#+ATTR_HTML: title="Coverage Status"
+[[https://coveralls.io/github/fisxoj/validate?branch=master][file:https://coveralls.io/repos/github/fisxoj/validate/badge.svg?branch=master]]
+
 ** Usage
 From the test suite:
 #+BEGIN_SRC lisp
