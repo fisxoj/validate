@@ -6,13 +6,16 @@ env:
     - PATH=$HOME/.roswell/bin:$PATH
     - ROSWELL_INSTALL_DIR=$HOME/.roswell
   matrix:
-    - LISP=sbcl-bin
+    - LISP=sbcl-bin COVERALLS=true
     - LISP=ccl-bin
+    - COVERAGE_EXCLUDE=t
 
 install:
   # Install Roswell
   - curl -L https://raw.githubusercontent.com/snmsts/roswell/release/scripts/install-for-ci.sh | sh
   - ros install prove
+  # Coveralls support
+  - git clone https://github.com/fukamachi/cl-coveralls ~/lisp/cl-coveralls
 
 cache:
   directories:
