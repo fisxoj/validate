@@ -10,34 +10,46 @@
            #:str
            #:int
            #:bool
-           #:email))
+           #:email
+	   #:default))
+
 (in-package :validate)
 
+;;; Conditions
 
 (define-condition <parse-error> (simple-error)
   ((value :initarg :value)
    (type :initarg :type))
+
   (:report (lambda (condition stream)
              (with-slots (value type) condition
                (format stream "Value ~a is not of type ~A" value type))))
+
   (:documentation "An error for conditions where a submitted value cannot be interpreted as the given type."))
+
 
 (define-condition <validation-error> (simple-error)
   ((value :initarg :value)
    (rule :initarg :rule))
+
   (:report (lambda (condition stream)
              (with-slots (rule value) condition
-                 (format stream "Value ~a didn't satisfy condition ~S" value rule))))
+	       (format stream "Value ~a didn't satisfy condition ~S" value rule))))
+
   (:documentation "Error to signal a validation condition wasn't met.
   e.g. Value 'a' didn't satisfy contition 'length at least 3 characters"))
 
-(defmacro with-validated-values (bindings (schema data) &body body)
+
+;;; Helpers/Public API
+
+(defmacro with-validated-values (bindings (schema data &optional (from :plist)) &body body)
   "Macro for extracting values from some map/hash like object and binding them lexically.
 
 Applies `schema` to `data` and binds to bindings."
+
   (alexandria:with-gensyms (validated)
 
-    `(let* ((,validated (schema ,schema ,data :as :hash-table))
+    `(let* ((,validated (schema ,schema ,data :from ,from :as :hash-table))
 
             ,@(mapcar (lambda (binding)
                         (if (listp binding)
@@ -50,13 +62,16 @@ Applies `schema` to `data` and binds to bindings."
                       bindings))
        ,@body)))
 
+
 (defun schema (schema data &key (from :plist) (as :plist) allow-other-fields)
+  "Run a set of data through a schema.  Return some associative structure with the validated fields in it."
+
   (let ((schema (funcall
-                 (ecase from
-                   (:plist #'alexandria:plist-alist)
-                   (:alist #'identity)
-                   (:hash-table #'alexandria:hash-table-alist))
-                 schema)))
+		 (ecase from
+		   (:plist #'alexandria:plist-alist)
+		   (:alist #'identity)
+		   (:hash-table #'alexandria:hash-table-alist))
+		 schema)))
 
     (funcall
      (ecase as
@@ -66,10 +81,14 @@ Applies `schema` to `data` and binds to bindings."
 
      ;; Run validation function on every entry in the schema
      (iterate (for (field . validation) in schema)
-              (for value = (getf data field))
+	      (for value = (getf data field))
 
-              (collect (cons field (funcall validation value)))))))
+	      (collect
+		  (iterate (for (validation-function . args) in (alexandria:ensure-list validation))
+			   (for validated-value initially value then (apply validation-function validated-value args))
+			   (finally (return (cons field validated-value)))))))))
 
+;;; Validators
 
 (defun int (value)
   (handler-case
@@ -89,16 +108,23 @@ Applies `schema` to `data` and binds to bindings."
 (defun str (value &key min-length max-length)
   (when min-length
     (unless (> (length value) min-length)
-      (error '<validation-error> :rule (format nil "length must be > ~d" min-length))))
+      (error '<validation-error> :rule (format nil "length must be > ~d" min-length) :value value)))
   (when max-length
     (unless (< (length value) max-length)
-      (error '<validation-error> :rule (format nil "length must be < ~d" max-length))))
+      (error '<validation-error> :rule (format nil "length must be < ~d" max-length) :value value)))
 
   value)
 
 (defun email (value)
-  (unless (ppcre:scan ".+@.+\\\..+" value)
+  (unless (ppcre:scan ".+@.+\\\..{2,}" value)
     (error '<validation-error>
-              :rule (format nil "string doesn't contain an email address")
-              :value value))
+	   :rule "string doesn't contain an email address."
+	   :value value))
   value)
+
+(defun default (value &optional (default-value ""))
+  "Provides a value if none is present."
+
+  (if (and value (not (zerop (length value))))
+      value
+      default-value))
