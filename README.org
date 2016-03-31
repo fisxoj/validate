@@ -3,25 +3,29 @@
 ** Usage
 From the test suite:
 #+BEGIN_SRC lisp
-(let ((schema `(:name    ,(lambda (value) (v:str value :min-length 1))
-                :age     v:int
-                :has-dog v:bool
-                :email   v:email))
-      (data '(
-             :name    "matt"
-             :age     "27"
-             :has-dog "no"
-             :email   "something@example.com")))
+  (let ((schema '(:name          ((v:str :min-length 1))
+                  :age           ((v:int))
+                  :has-dog       ((v:bool))
+                  :email         ((v:email))
+                  :favorite-food ((v:default "pizza") (v:str :min-length 3))))
 
-  (v:with-validated-values (name
-                            age
-                            (dog has-dog) ;; Value bound to a different name
-                            email)
-      (schema data)
-    (is name     "matt")
-    (is age      27)
-    (is dog  nil)
-    (is email    "something@example.com")))
+          (data   '(:name    "matt"
+                    :age     "27"
+                    :has-dog "no"
+                    :email   "something@example.com")))
+
+      (v:with-validated-values (name
+                                age
+                                (dog has-dog) ;; Value bound to a different name
+                                email
+                                favorite-food)
+          (schema data)
+
+        (is name          "matt")
+        (is age           27)
+        (is dog           nil)
+        (is email         "something@example.com")
+        (is favorite-food "pizza")))
 #+END_SRC
 ** Dependencies
 - iterate
