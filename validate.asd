@@ -12,7 +12,10 @@
   :version "0.1"
   :author "Matt Novenstern"
   :license "LLGPLv3"
-  :depends-on (:iterate :cl-ppcre :alexandria)
+  :depends-on (#:iterate
+                #:cl-ppcre
+                #:alexandria
+                #:local-time)
   :components ((:module "src"
                 :components
                 ((:file "validate"))))
