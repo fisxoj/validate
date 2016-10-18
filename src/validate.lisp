@@ -18,17 +18,6 @@
 
 ;;; Conditions
 
-(define-condition <parse-error> (simple-error)
-  ((value :initarg :value)
-   (type :initarg :type))
-
-  (:report (lambda (condition stream)
-             (with-slots (value type) condition
-               (format stream "Value ~a is not of type ~A" value type))))
-
-  (:documentation "An error for conditions where a submitted value cannot be interpreted as the given type."))
-
-
 (define-condition <validation-error> (simple-error)
   ((value :initarg :value)
    (rule :initarg :rule))
@@ -91,12 +80,12 @@ Applies `schema` to `data` and binds to bindings."
 
 ;;; Validators
 
-(defun int (value)
+(defun int (value &key (radix 10))
   (handler-case
-        (parse-integer value)
+        (parse-integer value :radix radix)
       (parse-error (e)
         (declare (ignore e))
-        (error '<parse-error> :type 'integer :value value))))
+        (error '<validation-error> :rule "Invalid integer" :value value))))
 
 ;; https://github.com/alecthomas/voluptuous/blob/master/voluptuous.py#L1265
 (defun bool (value)

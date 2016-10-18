@@ -24,8 +24,10 @@
 ;;; Integer
 (subtest "Integers"
   (is (v:int "12") 12 "An integer gets converted to a string.")
+  (is (v:int "A" :radix 16) 10 "Integers in hex work.")
+  (is (v:int "10" :radix 2) 2 "Binary integers work.")
   (is-error (v:int "a pizza")
-	    'validate:<parse-error>
+	    'validate:<validation-error>
 	    "A parse error is raised on strings that aren't integers."))
 
 ;;; Booleans
