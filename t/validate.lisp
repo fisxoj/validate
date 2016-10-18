@@ -56,8 +56,8 @@
     (is (v:bool "enable") t "'enable'"))
 
   (is-error (v:bool "2")
-	    'validate:<validate-error>
-	    "raise a validate error on strings that aren't boolean values"))
+	    'validate:<validation-error>
+	    "raise a validation error on strings that aren't boolean values"))
 
 ;;; Timestamps
 (subtest "Timestamp"
