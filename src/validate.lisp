@@ -2,6 +2,7 @@
 (defpackage validate
   (:use :iterate :cl)
   (:nicknames #:v)
+  (:shadow #:list)
   (:export #:parse
            #:schema
            #:<validation-error>
@@ -10,6 +11,7 @@
            #:int
            #:bool
            #:email
+           #:list
            #:timestamp
 	   #:default))
 
@@ -110,6 +112,33 @@ Applies `schema` to `data` and binds to bindings."
 	   :rule "string doesn't contain an email address."
 	   :value value))
   value)
+
+(defun list (value &key length truncate element-type)
+  (let ((list (jojo:parse value)))
+    (unless (consp list)
+      (error '<validation-error>
+             :rule "value is not a list."
+             :value value))
+    (let ((maybe-truncated-list
+           (cond
+             ((and length truncate) (subseq list 0 length))
+             (length (if (= (length list) length)
+                         list
+                         (error '<validation-error>
+                                :rule (format nil "list length is ~d, not ~d."
+                                              (length list) length)
+                                :value value)))
+             (t list))))
+
+      (if element-type
+          (handler-case
+              (mapcar element-type maybe-truncated-list)
+            (<validation-error> (e)
+              (with-slots (rule (subval value)) e
+                (error '<validation-error>
+                       :rule (format nil "Element ~a of list ~a failed rule ~S" subval value rule)
+                       :value value))))
+          maybe-truncated-list))))
 
 (defun timestamp (value)
   (handler-case
