@@ -57,6 +57,13 @@
 	    'validate:<parse-error>
 	    "raise a parse error on strings that aren't boolean values"))
 
+;;; Timestamps
+(subtest "Timestamp"
+  (ok (v:timestamp "2016-10-18T23:20:18.594Z")
+      "Parses a timestamp.")
+  (is-error (v:timestamp "potato") 'v:<validation-error>
+            "Raises an error on an invalid timestamp."))
+
 ;; Default values
 (subtest "Default"
   (is (v:default nil "potato") "potato" "Supplies a value instead of nil.")

@@ -11,6 +11,7 @@
            #:int
            #:bool
            #:email
+           #:timestamp
 	   #:default))
 
 (in-package :validate)
@@ -121,6 +122,15 @@ Applies `schema` to `data` and binds to bindings."
 	   :rule "string doesn't contain an email address."
 	   :value value))
   value)
+
+(defun timestamp (value)
+  (handler-case
+      (local-time:parse-timestring value)
+    (local-time::invalid-timestring (c)
+      (declare (ignore c))
+      (error '<validation-error>
+             :rule "parameter doesn't contain a valid timestamp."
+             :value value))))
 
 (defun default (value &optional (default-value ""))
   "Provides a value if none is present."
