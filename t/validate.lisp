@@ -28,7 +28,7 @@
   (is (v:int "10" :radix 2) 2 "Binary integers work.")
   (is-error (v:int "a pizza")
 	    'validate:<validation-error>
-	    "A parse error is raised on strings that aren't integers."))
+	    "A validate error is raised on strings that aren't integers."))
 
 ;;; Booleans
 (subtest "Boolean values"
@@ -56,8 +56,8 @@
     (is (v:bool "enable") t "'enable'"))
 
   (is-error (v:bool "2")
-	    'validate:<parse-error>
-	    "raise a parse error on strings that aren't boolean values"))
+	    'validate:<validate-error>
+	    "raise a validate error on strings that aren't boolean values"))
 
 ;;; Timestamps
 (subtest "Timestamp"
