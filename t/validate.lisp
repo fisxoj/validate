@@ -89,9 +89,9 @@
 ;; Test schema validation
 (subtest "Schemas"
   (let ((schema '(:name          ((v:str :min-length 1))
-		  :age           ((v:int))
-		  :has-dog       ((v:bool))
-		  :email         ((v:email))
+		  :age           (v:int)
+		  :has-dog       (v:bool)
+		  :email         (v:email)
 		  :favorite-food ((v:default "pizza") (v:str :min-length 3))))
 
 	(data   '(:name    "matt"

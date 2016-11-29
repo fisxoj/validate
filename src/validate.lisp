@@ -57,12 +57,12 @@ Applies `schema` to `data` and binds to bindings."
 (defun schema (schema data &key (from :plist) (as :plist) allow-other-fields)
   "Run a set of data through a schema.  Return some associative structure with the validated fields in it."
 
-  (let ((schema (funcall
+  (let ((data (funcall
 		 (ecase from
-		   (:plist #'alexandria:plist-alist)
-		   (:alist #'identity)
+		   (:plist #'identity)
+		   (:alist #'alexandria:alist-plist)
 		   (:hash-table #'alexandria:hash-table-alist))
-		 schema)))
+		 data)))
 
     (funcall
      (ecase as
@@ -71,12 +71,17 @@ Applies `schema` to `data` and binds to bindings."
        (:hash-table #'alexandria:alist-hash-table))
 
      ;; Run validation function on every entry in the schema
-     (iterate (for (field . validation) in schema)
+     (iterate (for (field validations) on schema by #'cddr)
 	      (for value = (getf data field))
-
 	      (collect
-		  (iterate (for (validation-function . args) in (alexandria:ensure-list validation))
-			   (for validated-value initially value then (apply validation-function validated-value args))
+		  (iterate (for validation in validations)
+			   (with validated-value = value)
+                           (setf validated-value
+                                 (if (consp validation)
+                                     (destructuring-bind (func &rest args) validation
+                                       ;; (format t "~&Calling ~a with args ~a~%" func args)
+                                         (apply func validated-value args))
+                                     (funcall validation validated-value)))
 			   (finally (return (cons field validated-value)))))))))
 
 ;;; Validators
