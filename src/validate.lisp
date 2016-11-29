@@ -152,6 +152,6 @@ Applies `schema` to `data` and binds to bindings."
 (defun default (value &optional (default-value ""))
   "Provides a value if none is present."
 
-  (if (and value (not (zerop (length value))))
+  (if (and value (not (emptyp value)))
       value
       default-value))
