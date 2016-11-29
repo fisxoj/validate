@@ -15,7 +15,8 @@
   :depends-on (#:iterate
                 #:cl-ppcre
                 #:alexandria
-                #:local-time)
+                #:local-time
+                #:jonathan)
   :components ((:module "src"
                 :components
                 ((:file "validate"))))
