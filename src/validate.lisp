@@ -2,31 +2,22 @@
 (defpackage validate
   (:use :iterate :cl)
   (:nicknames #:v)
+  (:shadow #:list)
   (:export #:parse
            #:schema
-           #:<parse-error>
            #:<validation-error>
            #:with-validated-values
            #:str
            #:int
            #:bool
            #:email
+           #:list
+           #:timestamp
 	   #:default))
 
 (in-package :validate)
 
 ;;; Conditions
-
-(define-condition <parse-error> (simple-error)
-  ((value :initarg :value)
-   (type :initarg :type))
-
-  (:report (lambda (condition stream)
-             (with-slots (value type) condition
-               (format stream "Value ~a is not of type ~A" value type))))
-
-  (:documentation "An error for conditions where a submitted value cannot be interpreted as the given type."))
-
 
 (define-condition <validation-error> (simple-error)
   ((value :initarg :value)
@@ -66,12 +57,12 @@ Applies `schema` to `data` and binds to bindings."
 (defun schema (schema data &key (from :plist) (as :plist) allow-other-fields)
   "Run a set of data through a schema.  Return some associative structure with the validated fields in it."
 
-  (let ((schema (funcall
+  (let ((data (funcall
 		 (ecase from
-		   (:plist #'alexandria:plist-alist)
-		   (:alist #'identity)
+		   (:plist #'identity)
+		   (:alist #'alexandria:alist-plist)
 		   (:hash-table #'alexandria:hash-table-alist))
-		 schema)))
+		 data)))
 
     (funcall
      (ecase as
@@ -80,32 +71,37 @@ Applies `schema` to `data` and binds to bindings."
        (:hash-table #'alexandria:alist-hash-table))
 
      ;; Run validation function on every entry in the schema
-     (iterate (for (field . validation) in schema)
+     (iterate (for (field validations) on schema by #'cddr)
 	      (for value = (getf data field))
-
 	      (collect
-		  (iterate (for (validation-function . args) in (alexandria:ensure-list validation))
-			   (for validated-value initially value then (apply validation-function validated-value args))
+		  (iterate (for validation in validations)
+			   (with validated-value = value)
+                           (setf validated-value
+                                 (if (consp validation)
+                                     (destructuring-bind (func &rest args) validation
+                                       ;; (format t "~&Calling ~a with args ~a~%" func args)
+                                         (apply func validated-value args))
+                                     (funcall validation validated-value)))
 			   (finally (return (cons field validated-value)))))))))
 
 ;;; Validators
 
-(defun int (value)
+(defun int (value &key (radix 10))
   (handler-case
       (etypecase value
-        (string (parse-integer value))
+        (string (parse-integer value :radix radix))
         (integer value))
       (parse-error (e)
         (declare (ignore e))
-        (error '<parse-error> :type 'integer :value value))))
+        (error '<validation-error> :rule "Invalid integer" :value value))))
 
 ;; https://github.com/alecthomas/voluptuous/blob/master/voluptuous.py#L1265
 (defun bool (value)
   (let ((downcased-value (string-downcase value)))
       (cond
-        ((member downcased-value '("y" "yes" "t" "true"  "on"  "enable" ) :test #'string=) t)
-        ((member downcased-value '("n" "no"  "f" "false" "off" "disable") :test #'string=) nil)
-        (t (error '<parse-error>  :type 'boolean :value value)))))
+        ((member downcased-value '("y" "yes" "t" "true"  "on"  "enable" ) :test #'string-equal) t)
+        ((member downcased-value '("n" "no"  "f" "false" "off" "disable") :test #'string-equal) nil)
+        (t (error '<validation-error>  :rule "Invalid boolean value" :value value)))))
 
 (defun str (value &key min-length max-length)
   (when min-length
@@ -124,9 +120,45 @@ Applies `schema` to `data` and binds to bindings."
 	   :value value))
   value)
 
+(defun list (value &key length truncate element-type)
+  (let ((list (jojo:parse value)))
+    (unless (consp list)
+      (error '<validation-error>
+             :rule "value is not a list."
+             :value value))
+    (let ((maybe-truncated-list
+           (cond
+             ((and length truncate) (subseq list 0 length))
+             (length (if (= (length list) length)
+                         list
+                         (error '<validation-error>
+                                :rule (format nil "list length is ~d, not ~d."
+                                              (length list) length)
+                                :value value)))
+             (t list))))
+
+      (if element-type
+          (handler-case
+              (mapcar element-type maybe-truncated-list)
+            (<validation-error> (e)
+              (with-slots (rule (subval value)) e
+                (error '<validation-error>
+                       :rule (format nil "Element ~a of list ~a failed rule ~S" subval value rule)
+                       :value value))))
+          maybe-truncated-list))))
+
+(defun timestamp (value)
+  (handler-case
+      (local-time:parse-timestring value)
+    (local-time::invalid-timestring (c)
+      (declare (ignore c))
+      (error '<validation-error>
+             :rule "parameter doesn't contain a valid timestamp."
+             :value value))))
+
 (defun default (value &optional (default-value ""))
   "Provides a value if none is present."
 
-  (if (and value (not (zerop (length value))))
+  (if (and value (not (alexandria:emptyp value)))
       value
       default-value))

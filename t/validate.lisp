@@ -23,11 +23,13 @@
 
 ;;; Integer
 (subtest "Integers"
-  (is (v:int "12") 12 "A string gets converted to an integer.")
+  (is (v:int "12") 12 "An integer gets converted to a string.")
+  (is (v:int "A" :radix 16) 10 "Integers in hex work.")
+  (is (v:int "10" :radix 2) 2 "Binary integers work.")
   (is (v:int 34) 34 "An int is passed through")
   (is-error (v:int "a pizza")
-	    'validate:<parse-error>
-	    "A parse error is raised on strings that aren't integers."))
+	    'validate:<validation-error>
+	    "A validate error is raised on strings that aren't integers."))
 
 ;;; Booleans
 (subtest "Boolean values"
@@ -55,8 +57,30 @@
     (is (v:bool "enable") t "'enable'"))
 
   (is-error (v:bool "2")
-	    'validate:<parse-error>
-	    "raise a parse error on strings that aren't boolean values"))
+	    'validate:<validation-error>
+	    "raise a validation error on strings that aren't boolean values"))
+
+;;; List
+
+(subtest "List"
+  (ok (v:list "[1,2]")
+      "validates a simple json list.")
+  (is-error (v:list "[1,2,3,4]" :length 2)
+            'v:<validation-error>
+            "Too long a list generates an error.")
+  (is (v:list "[1,2,3]" :length 2 :truncate t)
+      '(1 2)
+      "Truncate truncates lists.")
+  (is-error (v:list "[\"a\", \"bv\"]" :element-type 'v:int)
+            'v:<validation-error>
+            "Raises an error on invalid element types."))
+
+;;; Timestamps
+(subtest "Timestamp"
+  (ok (v:timestamp "2016-10-18T23:20:18.594Z")
+      "Parses a timestamp.")
+  (is-error (v:timestamp "potato") 'v:<validation-error>
+            "Raises an error on an invalid timestamp."))
 
 ;; Default values
 (subtest "Default"
@@ -66,9 +90,9 @@
 ;; Test schema validation
 (subtest "Schemas"
   (let ((schema '(:name          ((v:str :min-length 1))
-		  :age           ((v:int))
-		  :has-dog       ((v:bool))
-		  :email         ((v:email))
+		  :age           (v:int)
+		  :has-dog       (v:bool)
+		  :email         (v:email)
 		  :favorite-food ((v:default "pizza") (v:str :min-length 3))))
 
 	(data   '(:name    "matt"

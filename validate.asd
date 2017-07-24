@@ -9,10 +9,14 @@
 (in-package :validate-asd)
 
 (defsystem validate
-  :version "0.1"
+  :version "0.2"
   :author "Matt Novenstern"
   :license "LLGPLv3"
-  :depends-on (:iterate :cl-ppcre :alexandria)
+  :depends-on (#:iterate
+                #:cl-ppcre
+                #:alexandria
+                #:local-time
+                #:jonathan)
   :components ((:module "src"
                 :components
                 ((:file "validate"))))
