@@ -92,7 +92,9 @@ Applies `schema` to `data` and binds to bindings."
 
 (defun int (value)
   (handler-case
-        (parse-integer value)
+      (etypecase value
+        (string (parse-integer value))
+        (integer value))
       (parse-error (e)
         (declare (ignore e))
         (error '<parse-error> :type 'integer :value value))))

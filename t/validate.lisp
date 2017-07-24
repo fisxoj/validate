@@ -23,7 +23,8 @@
 
 ;;; Integer
 (subtest "Integers"
-  (is (v:int "12") 12 "An integer gets converted to a string.")
+  (is (v:int "12") 12 "A string gets converted to an integer.")
+  (is (v:int 34) 34 "An int is passed through")
   (is-error (v:int "a pizza")
 	    'validate:<parse-error>
 	    "A parse error is raised on strings that aren't integers."))
