@@ -9,7 +9,7 @@
 (in-package :validate-asd)
 
 (defsystem validate
-  :version "0.2"
+  :version "0.2.1"
   :author "Matt Novenstern"
   :license "LLGPLv3"
   :depends-on (#:iterate
