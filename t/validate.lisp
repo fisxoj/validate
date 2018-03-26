@@ -26,10 +26,18 @@
   (is (v:int "12") 12 "An integer gets converted to a string.")
   (is (v:int "A" :radix 16) 10 "Integers in hex work.")
   (is (v:int "10" :radix 2) 2 "Binary integers work.")
-  (is (v:int 34) 34 "An int is passed through")
+  (is (v:int 34) 34 "An int is passed through.")
+  (is (v:int 34 :max 100) 34 "An int below a maximum is allowed.")
+  (is (v:int 34 :min 3) 34 "An int above a minimum is allowed.")
   (is-error (v:int "a pizza")
 	    'validate:<validation-error>
-	    "A validate error is raised on strings that aren't integers."))
+	    "A validate error is raised on strings that aren't integers.")
+  (is-error (v:int "127" :min 200)
+	    'validate:<validation-error>
+	    "A validate error is raised on numbers below a minimum.")
+  (is-error (v:int "127" :max 20)
+	    'validate:<validation-error>
+	    "A validate error is raised on numbers above a maximum."))
 
 ;;; Booleans
 (subtest "Boolean values"

@@ -86,14 +86,22 @@ Applies `schema` to `data` and binds to bindings."
 
 ;;; Validators
 
-(defun int (value &key (radix 10))
+(defun int (value &key (radix 10) max min)
   (handler-case
-      (etypecase value
-        (string (parse-integer value :radix radix))
-        (integer value))
-      (parse-error (e)
-        (declare (ignore e))
-        (error '<validation-error> :rule "Invalid integer" :value value))))
+      (let ((number (etypecase value
+                      (string (parse-integer value :radix radix))
+                      (integer value))))
+
+        (when (and max (> number max))
+          (error '<validation-error> :rule "Value too small" :value value))
+
+        (when (and min (< number min))
+          (error '<validation-error> :rule "Value too large" :value value))
+
+        number)
+    (parse-error (e)
+      (declare (ignore e))
+      (error '<validation-error> :rule "Invalid integer" :value value))))
 
 ;; https://github.com/alecthomas/voluptuous/blob/master/voluptuous.py#L1265
 (defun bool (value)
