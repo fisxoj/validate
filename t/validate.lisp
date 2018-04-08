@@ -19,6 +19,7 @@
 (subtest "Strings"
   (is-error (v:str "me" :min-length 3) 'v:<validation-error> "A too-short string throws an error.")
   (is-error (v:str "pizza" :max-length 3) 'v:<validation-error> "A too-long string throws an error.")
+  (ok (v:str "three" :min-length 5 :max-length 5) "A string that matches the constraints is fine (constraints are inclusive)")
   (is (v:str "a string") "a string" "Validated strings match the original string."))
 
 ;;; Integer
@@ -29,6 +30,8 @@
   (is (v:int 34) 34 "An int is passed through.")
   (is (v:int 34 :max 100) 34 "An int below a maximum is allowed.")
   (is (v:int 34 :min 3) 34 "An int above a minimum is allowed.")
+  (is (v:int 34 :min 34) 34 "An int equal to the minimum value is allowed.")
+  (is (v:int 34 :max 34) 34 "An int equal to the maximum value is allowed.")
   (is-error (v:int "a pizza")
 	    'validate:<validation-error>
 	    "A validate error is raised on strings that aren't integers.")
