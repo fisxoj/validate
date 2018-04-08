@@ -3,34 +3,18 @@
   Copyright (c) 2016 Matt Novenstern (fisxoj@gmail.com)
 |#
 
-(in-package :cl-user)
-(defpackage validate-asd
-  (:use :cl :asdf))
-(in-package :validate-asd)
-
 (defsystem validate
   :version "0.2.2"
   :author "Matt Novenstern"
   :license "LLGPLv3"
-  :depends-on (#:iterate
-                #:cl-ppcre
-                #:alexandria
-                #:local-time
-                #:jonathan)
-  :components ((:module "src"
-                :components
-                ((:file "validate"))))
-  :description ""
-  :long-description
-  #.(with-open-file (stream (merge-pathnames
-                             #p"README.org"
-                             (or *load-pathname* *compile-file-pathname*))
-                            :if-does-not-exist nil
-                            :direction :input)
-      (when stream
-        (let ((seq (make-array (file-length stream)
-                               :element-type 'character
-                               :fill-pointer t)))
-          (setf (fill-pointer seq) (read-sequence seq stream))
-          seq)))
+  :depends-on ("iterate"
+               "cl-ppcre"
+               "alexandria"
+               "local-time"
+               "jonathan")
+  :pathname #P"src/"
+  :components ((:file "validate"))
+
+  :description "Data validation library."
+
   :in-order-to ((test-op (test-op validate-test))))

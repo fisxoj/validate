@@ -113,10 +113,10 @@ Applies `schema` to `data` and binds to bindings."
 
 (defun str (value &key min-length max-length)
   (when min-length
-    (unless (> (length value) min-length)
+    (unless (>= (length value) min-length)
       (error '<validation-error> :rule (format nil "length must be > ~d" min-length) :value value)))
   (when max-length
-    (unless (< (length value) max-length)
+    (unless (<= (length value) max-length)
       (error '<validation-error> :rule (format nil "length must be < ~d" max-length) :value value)))
 
   value)
