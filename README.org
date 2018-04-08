@@ -5,8 +5,65 @@
 #+ATTR_HTML: title="Coverage Status"
 [[https://coveralls.io/github/fisxoj/validate?branch=master][file:https://coveralls.io/repos/github/fisxoj/validate/badge.svg?branch=master]]
 
+Validate is a set of simple validation functions for common lisp written to be used wherever user-provided data enters a program.  It's useful for APIs, text adventures, or whatever else takes in data that might not be in the form you're expecting.  It's a pretty simple library, but makes some effort to do The Right Thing with data, like converting a range of values to booleans (off, false, nil, &c.) and accepting strings that represent numbers as well as integer values (but they always come out integers!)
+
 ** Usage
-From the test suite:
+The package has the nickname ~v~ so it's easier to work with.  You would probably find the [[https://github.com/nightfly19/cl-arrows][cl-arrows]] library useful, if you need to compose validators, especially the ~->~ macro (all the validation functions take the data to be validated as the first argument), which could be used like so.
+
+#+BEGIN_SRC lisp
+  (let ((favorite-potato (-> (parameter :potato)
+                             (v:default "Yam")
+                             v:str)))
+    (save-favorite-potato favorite-potato))
+#+END_SRC
+
+Right now, validate has, effectively, two patterns for usage: the schema style and the ad-hoc validation style.
+
+*** Validators
+Validation functions all take a ~value~ as the first argument and zero or more configuration arguments that modify their behavior.  They may change the type of ~value~ (~v:int~ can decode strings, ~v:timestamp~ creates timestamps from strings) but they all generally expect their input will be a string.  If they can't validate the data they see, they throw a ~v:<validation-error>~.  That's about all there is to it.
+
+- int
+
+  ~radix~: What base is this number in?  Defaults to 10.  ~(v:int "F" :radix 16) == 15~
+
+  ~min~, ~max~: What are the minimum and maximum values (inclusive) that are acceptable?  Doesn't check unless they're specified.
+
+- bool
+
+  Takes a variety of input strings and turns them into ~t~ or ~nil~.  Valid values include "y", "yes", "t", "true", "on", "enable" (and their false equivalents).
+
+- str
+
+  ~min-length~, ~max-length~: Minimum and maximum allowed length of the string.
+
+- email
+
+  Performs a basic check that the string resembles an email.  Checking exhaustively is hard and probably futile, so validate doesn't try.
+
+- list
+
+  ~length~: How long should the list be?  Does nothing unless specified.
+
+  ~truncate~: If this is ~t~ and ~length~ is set, truncate the list at that length.
+
+  ~element-type~: Accepts a validation function that is run on every member of a decoded JSON array.  For example, you might use ~(v:list data :element-type v:int)~ to validate a list of integers.
+
+- timestamp
+
+  Checks if the vale is a timestamp that [[https://github.com/dlowe-net/local-time][local-time]] can parse.
+
+- default
+
+  Use this to provide a default value if the data is empty (null or empty string, according to ~alexandria:emptyp~.  Useful for, well, default values.
+
+
+*** How to use the library
+
+I wrote the schema style to mirror [[https://github.com/alecthomas/voluptuous][Voluptuous]] for Python, but then I ended up not using it much in practicality.
+
+To use the schema-style, despite my boredom with it, you can do this:
+
+(From the test suite)
 #+BEGIN_SRC lisp
   (let ((schema '(:name          ((v:str :min-length 1))
                   :age           ((v:int))
@@ -32,6 +89,18 @@ From the test suite:
         (is email         "something@example.com")
         (is favorite-food "pizza")))
 #+END_SRC
+
+To use the ad-hoc style, write your own condition handler something like:
+
+#+BEGIN_SRC lisp
+  (handler-case
+      (let ((name (v:str (get-parameter :name))))
+        (render-a-template :name name))
+
+    (v:<validation-error> (e)
+       (respond-with-a-400)))
+#+END_SRC
+
 ** Dependencies
 - iterate
 - cl-ppcre
