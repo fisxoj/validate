@@ -1,7 +1,7 @@
-(in-package :cl-user)
 (defpackage validate-test
-  (:use :cl
-        :prove))
+  (:use #:cl
+        #:prove))
+
 (in-package :validate-test)
 
 (plan nil)
@@ -14,6 +14,15 @@
   (is-error (v:email "me@here") 'v:<validation-error> "Email without a TLD throws an error.")
   (is-error (v:email "me@here.a") 'v:<validation-error> "Email with an invalid TLD throws an error.")
   (is-error (v:email "mehere.xyz") 'v:<validation-error> "Email with no @ throws an error."))
+
+(subtest "regex"
+  (ok (v:regex "aaaaaa" "[a]{5}")
+      "Works for simple regexes.")
+  (ok (v:regex "cat" "^(cat|dog)$")
+      "Allows another simple regex.")
+  (is-error (v:regex "potato" "\\d+")
+	    'v:<validation-error>
+	    "An non-matching string raises a validation error."))
 
 ;;; String
 (subtest "Strings"
@@ -84,7 +93,10 @@
       "Truncate truncates lists.")
   (is-error (v:list "[\"a\", \"bv\"]" :element-type 'v:int)
             'v:<validation-error>
-            "Raises an error on invalid element types."))
+            "Raises an error on invalid element types.")
+  (is-error (v:list "12")
+	    'v:<validation-error>
+	    "Rases an error when value is not a list at all!"))
 
 ;;; Timestamps
 (subtest "Timestamp"

@@ -1,4 +1,3 @@
-(in-package :cl-user)
 (defpackage validate
   (:use :iterate :cl)
   (:nicknames #:v)
@@ -12,6 +11,7 @@
            #:bool
            #:email
            #:list
+	   #:regex
            #:timestamp
 	   #:default))
 
@@ -126,6 +126,11 @@ Applies `schema` to `data` and binds to bindings."
 	   :rule "string doesn't contain an email address."
 	   :value value))
   value)
+
+(defun regex (value regex)
+  (if (ppcre:scan regex value)
+      value
+    (error '<validation-error> :rule (format nil "string doesn't match regex ~s" regex))))
 
 (defun list (value &key length truncate element-type)
   (let ((list (jojo:parse value)))
