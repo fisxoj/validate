@@ -4,7 +4,7 @@
 
 (in-package :validate-test)
 
-(plan nil)
+(plan 8)
 
 ;; Test parsing
 
@@ -109,31 +109,5 @@
 (subtest "Default"
   (is (v:default nil "potato") "potato" "Supplies a value instead of nil.")
   (is (v:default "" "potato") "potato" "Supplies a value for an empty string."))
-
-;; Test schema validation
-(subtest "Schemas"
-  (let ((schema '(:name          ((v:str :min-length 1))
-		  :age           (v:int)
-		  :has-dog       (v:bool)
-		  :email         (v:email)
-		  :favorite-food ((v:default "pizza") (v:str :min-length 3))))
-
-	(data   '(:name    "matt"
-		  :age     "27"
-		  :has-dog "no"
-		  :email   "something@example.com")))
-
-    (v:with-validated-values (name
-			      age
-			      (dog has-dog) ;; Value bound to a different name
-			      email
-			      favorite-food)
-	(schema data)
-
-      (is name          "matt")
-      (is age           27)
-      (is dog           nil)
-      (is email         "something@example.com")
-      (is favorite-food "pizza"))))
 
 (finalize)

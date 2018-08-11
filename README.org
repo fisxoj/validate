@@ -59,38 +59,7 @@ Validation functions all take a ~value~ as the first argument and zero or more c
 
 *** How to use the library
 
-I wrote the schema style to mirror [[https://github.com/alecthomas/voluptuous][Voluptuous]] for Python, but then I ended up not using it much in practicality.
-
-To use the schema-style, despite my boredom with it, you can do this:
-
-(From the test suite)
-#+BEGIN_SRC lisp
-  (let ((schema '(:name          ((v:str :min-length 1))
-                  :age           ((v:int))
-                  :has-dog       ((v:bool))
-                  :email         ((v:email))
-                  :favorite-food ((v:default "pizza") (v:str :min-length 3))))
-
-          (data   '(:name    "matt"
-                    :age     "27"
-                    :has-dog "no"
-                    :email   "something@example.com")))
-
-      (v:with-validated-values (name
-                                age
-                                (dog has-dog) ;; Value bound to a different name
-                                email
-                                favorite-food)
-          (schema data)
-
-        (is name          "matt")
-        (is age           27)
-        (is dog           nil)
-        (is email         "something@example.com")
-        (is favorite-food "pizza")))
-#+END_SRC
-
-To use the ad-hoc style, write your own condition handler something like:
+To do ad-hoc validation with ~validate~, simply call functions and catch validation errors:
 
 #+BEGIN_SRC lisp
   (handler-case
@@ -100,6 +69,8 @@ To use the ad-hoc style, write your own condition handler something like:
     (v:<validation-error> (e)
        (respond-with-a-400)))
 #+END_SRC
+
+~validate~ used to have the concept of a ~schema~, or many collected fields to validate together.  It was removed in version =0.5.0= to keep this library simpler.
 
 ** Dependencies
 - iterate

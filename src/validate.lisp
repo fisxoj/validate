@@ -30,60 +30,6 @@
   (:documentation "Error to signal a validation condition wasn't met.
   e.g. Value 'a' didn't satisfy contition 'length at least 3 characters"))
 
-
-;;; Helpers/Public API
-
-(defmacro with-validated-values (bindings (schema data &optional (from :plist)) &body body)
-  "Macro for extracting values from some map/hash like object and binding them lexically.
-
-Applies `schema` to `data` and binds to bindings."
-
-  (alexandria:with-gensyms (validated)
-
-    `(let* ((,validated (schema ,schema ,data :from ,from :as :hash-table))
-
-            ,@(mapcar (lambda (binding)
-                        (if (listp binding)
-                            `(,(first binding)
-                               (gethash ,(alexandria:make-keyword (second binding))
-                                        ,validated))
-                            `(,binding
-                              (gethash ,(alexandria:make-keyword binding)
-                                       ,validated))))
-                      bindings))
-       ,@body)))
-
-
-(defun schema (schema data &key (from :plist) (as :plist) allow-other-fields)
-  "Run a set of data through a schema.  Return some associative structure with the validated fields in it."
-
-  (let ((data (funcall
-		 (ecase from
-		   (:plist #'identity)
-		   (:alist #'alexandria:alist-plist)
-		   (:hash-table #'alexandria:hash-table-alist))
-		 data)))
-
-    (funcall
-     (ecase as
-       (:plist #'alexandria:alist-plist)
-       (:alist #'identity)
-       (:hash-table #'alexandria:alist-hash-table))
-
-     ;; Run validation function on every entry in the schema
-     (iterate (for (field validations) on schema by #'cddr)
-	      (for value = (getf data field))
-	      (collect
-		  (iterate (for validation in validations)
-			   (with validated-value = value)
-                           (setf validated-value
-                                 (if (consp validation)
-                                     (destructuring-bind (func &rest args) validation
-                                       ;; (format t "~&Calling ~a with args ~a~%" func args)
-                                         (apply func validated-value args))
-                                     (funcall validation validated-value)))
-			   (finally (return (cons field validated-value)))))))))
-
 ;;; Validators
 
 (defun int (value &key (radix 10) max min)
