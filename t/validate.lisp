@@ -83,15 +83,15 @@
 ;;; List
 
 (subtest "List"
-  (ok (v:list "[1,2]")
+  (ok (v:list (list 1 2))
       "validates a simple json list.")
-  (is-error (v:list "[1,2,3,4]" :length 2)
+  (is-error (v:list (list 1 2 3 4) :length 2)
             'v:<validation-error>
             "Too long a list generates an error.")
-  (is (v:list "[1,2,3]" :length 2 :truncate t)
+  (is (v:list (list 1 2 3) :length 2 :truncate t)
       '(1 2)
       "Truncate truncates lists.")
-  (is-error (v:list "[\"a\", \"bv\"]" :element-type 'v:int)
+  (is-error (v:list (list "a" "bc") :element-type 'v:int)
             'v:<validation-error>
             "Raises an error on invalid element types.")
   (is-error (v:list "12")
