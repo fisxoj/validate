@@ -14,7 +14,5 @@
                "jonathan")
   :pathname #P"src/"
   :components ((:file "validate"))
-
-  :description "Data validation library."
-
+  :description "A data validation library for common lisp."
   :in-order-to ((test-op (test-op validate-test))))

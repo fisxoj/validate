@@ -8,10 +8,11 @@
   :license ""
   :depends-on ("validate"
                "prove")
-  :pathname #P"t/"
+  :pathname "t"
   :components ((:test-file "validate"))
   :description "Test system for validate"
 
-  :defsystem-depends-on ("prove-asdf")
+  :defsystem-depends-on (:prove-asdf)
   :perform (test-op (op c)
-                    (symbol-call :prove-asdf :run-test-system c)))
+		    (funcall (read-from-string "prove:run")
+			     (system-relative-pathname :validate-test #P"t/"))))

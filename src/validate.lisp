@@ -105,11 +105,10 @@ Applies `schema` to `data` and binds to bindings."
 
 ;; https://github.com/alecthomas/voluptuous/blob/master/voluptuous.py#L1265
 (defun bool (value)
-  (let ((downcased-value (string-downcase value)))
-      (cond
-        ((member downcased-value '("y" "yes" "t" "true"  "on"  "enable" ) :test #'string-equal) t)
-        ((member downcased-value '("n" "no"  "f" "false" "off" "disable") :test #'string-equal) nil)
-        (t (error '<validation-error>  :rule "Invalid boolean value" :value value)))))
+  (cond
+    ((member value '("y" "yes" "t" "true"  "on"  "enable" ) :test #'string-equal) t)
+    ((member value '("n" "no"  "f" "false" "off" "disable") :test #'string-equal) nil)
+    (t (error '<validation-error>  :rule "Invalid boolean value" :value value))))
 
 (defun str (value &key min-length max-length)
   (when min-length
@@ -166,7 +165,6 @@ Applies `schema` to `data` and binds to bindings."
 
 (defun default (value &optional (default-value ""))
   "Provides a value if none is present."
-
-  (if (and value (not (alexandria:emptyp value)))
-      value
-      default-value))
+  (if (alexandria:emptyp value)
+      default-value
+      value))
