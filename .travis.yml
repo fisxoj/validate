@@ -1,5 +1,7 @@
 language: common-lisp
 sudo: false
+notifications:
+  email: false
 
 env:
   global:

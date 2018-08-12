@@ -108,9 +108,3 @@
     (local-time::invalid-timestring (c)
       (declare (ignore c))
       (fail value "value is not a valid timestamp."))))
-
-(defun default (value &optional (default-value ""))
-  "Provides a value if none is present."
-  (if (alexandria:emptyp value)
-      default-value
-      value))

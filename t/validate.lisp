@@ -4,7 +4,7 @@
 
 (in-package :validate-test)
 
-(plan 8)
+(plan 7)
 
 ;; Test parsing
 
@@ -104,10 +104,5 @@
       "Parses a timestamp.")
   (is-error (v:timestamp "potato") 'v:<validation-error>
             "Raises an error on an invalid timestamp."))
-
-;; Default values
-(subtest "Default"
-  (is (v:default nil "potato") "potato" "Supplies a value instead of nil.")
-  (is (v:default "" "potato") "potato" "Supplies a value for an empty string."))
 
 (finalize)

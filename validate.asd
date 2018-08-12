@@ -4,7 +4,7 @@
 |#
 
 (defsystem validate
-  :version "0.6.0"
+  :version "0.7.0"
   :author "Matt Novenstern"
   :license "LLGPLv3"
   :depends-on ("iterate"
