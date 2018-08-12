@@ -26,6 +26,7 @@
 
 ;;; String
 (subtest "Strings"
+  (is-error (v:str 4) 'v:<validation-error> "A number is not a string.")
   (is-error (v:str "me" :min-length 3) 'v:<validation-error> "A too-short string throws an error.")
   (is-error (v:str "pizza" :max-length 3) 'v:<validation-error> "A too-long string throws an error.")
   (ok (v:str "three" :min-length 5 :max-length 5) "A string that matches the constraints is fine (constraints are inclusive)")

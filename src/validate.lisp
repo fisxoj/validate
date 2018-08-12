@@ -64,6 +64,8 @@
     (t (fail value "is not a valid boolean value"))))
 
 (defun str (value &key min-length max-length)
+  (unless (typep value 'string)
+    (fail value "must be a string."))
   (when min-length
     (unless (>= (length value) min-length)
       (fail value "string length must be > ~d" min-length)))
@@ -74,6 +76,7 @@
   value)
 
 (defun email (value)
+  (str value)
   (unless (ppcre:scan ".+@.+\\\..{2,}" value)
     (fail value "string doesn't contain an email address."))
   value)
