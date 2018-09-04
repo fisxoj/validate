@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<link rel="stylesheet" href="default.css" type="text/css" />
+<title>validate package</title>
+</head>
+<body>
+<div id="validate-package" class="document"><h1 class="title">validate package</h1>
+<p>Validate is a pretty simple library that is meant to be used in situations where you want to throw errors when data isn't quite what you expected.  For example, when you receive user input, because who knows what a user will really do!</p>
+<dl class="docutils"><dt>You will likely use validate like this::</dt>
+<dd><dl class="docutils first last"><dt>(handler-case</dt>
+<dd><dl class="docutils first last"><dt>(let ((my-int (v:int some-user-data)))</dt>
+<dd>(code-expecting-an-int my-int))</dd>
+<dt>(v:&lt;validation-error&gt; (e)</dt>
+<dd>(report-error e)))</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<div id="classes" class="section"><h2><a name="classes">Classes</a></h2>
+<a id="class-3cvalidation-error-3e" class="target" name="class-3cvalidation-error-3e"></a><dl class="docutils"><dt><tt class="docutils literal">
+<span class="pre">&lt;validation-error&gt;</span></tt></dt>
+<dd>Error to signal a validation condition wasn't met. e.g. Value 'a' didn't satisfy contition 'length at least 3 characters'</dd>
+</dl>
+</div>
+<div id="functions" class="section"><h2><a name="functions">Functions</a></h2>
+<a id="function-timestamp" class="target" name="function-timestamp"></a><dl class="docutils"><dt><tt class="docutils literal">
+<span class="pre">timestamp</span></tt></dt>
+<dd>Check that <tt class="docutils literal param">
+<span class="pre">value</span></tt> is a timestamp as recognized by <a class="reference" href="https://common-lisp.net/project/local-time/"><span>local-time</span></a>.</dd>
+</dl>
+<a id="function-bool" class="target" name="function-bool"></a><dl class="docutils"><dt><tt class="docutils literal">
+<span class="pre">bool</span></tt></dt>
+<dd>Attempts to convert <tt class="docutils literal param">
+<span class="pre">value</span></tt> to a <tt class="docutils literal">
+<span class="pre">t</span></tt> or <tt class="docutils literal">
+<span class="pre">nil</span></tt> by comparing it to a list of stringy true or false values.  Throws a <a class="reference ref-class" href="validate.html#class-%3cvalidation-error%3e"><span class="ref-class">&lt;validation-error&gt;</span></a> if it can't figure out if <tt class="docutils literal param">
+<span class="pre">value</span></tt> is truthy or falsey.</dd>
+</dl>
+<a id="function-str" class="target" name="function-str"></a><dl class="docutils"><dt><tt class="docutils literal">
+<span class="pre">str</span></tt></dt>
+<dd>Checks that <tt class="docutils literal param">
+<span class="pre">value</span></tt> is a string.</dd>
+</dl>
+<p>If specified, checks that <tt class="docutils literal param">
+<span class="pre">min-length</span></tt> &lt;= <tt class="docutils literal">
+<span class="pre">(length</span> <span class="pre">value)</span></tt> &lt;= <tt class="docutils literal param">
+<span class="pre">max-length</span></tt>.</p>
+<a id="function-regex" class="target" name="function-regex"></a><dl class="docutils"><dt><tt class="docutils literal">
+<span class="pre">regex</span></tt></dt>
+<dd>Checks if <tt class="docutils literal param">
+<span class="pre">value</span></tt> matches <tt class="docutils literal param">
+<span class="pre">regex</span></tt>.</dd>
+</dl>
+<a id="function-list" class="target" name="function-list"></a><dl class="docutils"><dt><tt class="docutils literal">
+<span class="pre">list</span></tt></dt>
+<dd>Checks that <tt class="docutils literal param">
+<span class="pre">value</span></tt> is a list.</dd>
+</dl>
+<p>If <tt class="docutils literal param">
+<span class="pre">length</span></tt> is specified, check that the list has that length.</p>
+<p>If <tt class="docutils literal param">
+<span class="pre">length</span></tt> is given and <tt class="docutils literal param">
+<span class="pre">truncate</span></tt> is true, truncate the list to that length.</p>
+<p>If <tt class="docutils literal param">
+<span class="pre">element-type</span></tt> is given, it should be another validation function that will be called on every element of <tt class="docutils literal param">
+<span class="pre">value</span></tt>.</p>
+<a id="function-int" class="target" name="function-int"></a><dl class="docutils"><dt><tt class="docutils literal">
+<span class="pre">int</span></tt></dt>
+<dd>Accepts a <tt class="docutils literal param">
+<span class="pre">value</span></tt> as an integer or string.</dd>
+</dl>
+<p>If <tt class="docutils literal param">
+<span class="pre">value</span></tt> is a string, interpret it as a value with base- <tt class="docutils literal param">
+<span class="pre">radix</span></tt>.</p>
+<p>If specified, make sure <tt class="docutils literal param">
+<span class="pre">min</span></tt> &lt;= <tt class="docutils literal param">
+<span class="pre">value</span></tt> &lt;= <tt class="docutils literal param">
+<span class="pre">max</span></tt>.</p>
+<a id="function-email" class="target" name="function-email"></a><dl class="docutils"><dt><tt class="docutils literal">
+<span class="pre">email</span></tt></dt>
+<dd>Checks that <tt class="docutils literal param">
+<span class="pre">value</span></tt> resembles an email address.</dd>
+</dl>
+<p>This is not an exhaustive check - some characters between an <tt class="docutils literal">
+<span class="pre">@</span></tt> and a <tt class="docutils literal">
+<span class="pre">.</span></tt> will suffice.</p>
+</div>
+<hr class ="docutils footer" /><div class="footer">Generated on : Mon, 03 Sep 2018 23:22:45 .
+Generated by cl-docutils 0.1.1 from <a class="reference" href="http://docutils.sourceforge.net/rst.html"><span>restructured text</span></a> source.
+</div>
+</div>
+</body>
+</html>
