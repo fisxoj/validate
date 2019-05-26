@@ -101,6 +101,8 @@
 
 ;;; Timestamps
 (subtest "Timestamp"
+  (ok (v:timestamp (local-time:parse-timestring "2016-10-18T23:20:18.594Z"))
+      "Accepts a LOCAL-TIME:TIMESTAMP.")
   (ok (v:timestamp "2016-10-18T23:20:18.594Z")
       "Parses a timestamp.")
   (is-error (v:timestamp "potato") 'v:<validation-error>

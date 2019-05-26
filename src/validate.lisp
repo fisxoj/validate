@@ -149,8 +149,11 @@ If :param:`element-type` is given, it should be another validation function that
 
 .. _local-time: https://common-lisp.net/project/local-time/"
 
-  (handler-case
-      (local-time:parse-timestring value)
-    (local-time::invalid-timestring (c)
-      (declare (ignore c))
-      (fail value "value is not a valid timestamp."))))
+
+  (etypecase value
+    (local-time:timestamp value)
+    (string (handler-case
+                (local-time:parse-timestring value)
+              (local-time::invalid-timestring (c)
+                (declare (ignore c))
+                (fail value "value is not a valid timestamp."))))))
